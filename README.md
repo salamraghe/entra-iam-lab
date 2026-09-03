@@ -2,7 +2,7 @@
 
 Hands-on Microsoft Entra ID lab: users, groups, P2 licensing, and an MFA-ready security group in a real tenant.
 
-Only items with a dump are marked done. Screenshots are from the 2026-09-02 sitting. Finish-user screens that showed temporary passwords were not committed. AD and Okta live in other repos.
+Only items with a dump are marked done. Proof is the 2026-09-02 sitting. Finish-user screens that showed temporary passwords were not used. Screenshot files from that dump are ready locally and will be added when binary upload works. AD and Okta live in other repos.
 
 ## Scope
 
@@ -35,22 +35,6 @@ Only items with a dump are marked done. Screenshots are from the 2026-09-02 sitt
 3. Created **Leaver User** (visible in the group member picker).
 4. Created security group **MFA-Test-Group**. Role assignment left off.
 5. Added **testuser** as the only member. **leaver** was not added.
-
-![Admin center users at the start of the sitting](screenshots/01-admin-center-users.png)
-
-![P2 Managed Trial on Products](screenshots/02-p2-trial-products.png)
-
-![Test User review: P2, not admin](screenshots/06-testuser-review.png)
-
-![MFA-Test-Group review before create](screenshots/16-group-review.png)
-
-![MFA-Test-Group created](screenshots/17-group-created.png)
-
-![Security groups list, created Sep 2, 2026 8:29 PM](screenshots/18-security-groups-list.png)
-
-![Add members picker: labadmin, Leaver, guest, testuser](screenshots/22-add-members-picker.png)
-
-![testuser saved as member of MFA-Test-Group](screenshots/23-testuser-member.png)
 
 ## How to redo it
 
