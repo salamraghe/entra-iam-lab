@@ -137,7 +137,7 @@ Docs used: [Create users](https://learn.microsoft.com/en-us/entra/fundamentals/h
 - **Toolkit connection id comes after SP create.** Early Basic SAML drafts used Reply `/SAML/Consume` without `/22318`. Final saved config uses Consume/Login **22318** after the Toolkit SP config row existed.
 - **Gallery Test SSO vs My Apps proof.** Sitting used InPrivate My Apps as testuser for end-user SSO proof instead of relying only on the admin Test blade.
 
-## Hiring screen-share
+## Demo walkthrough
 
 Walk this in entra.microsoft.com and admin.microsoft.com, not a slide deck.
 
