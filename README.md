@@ -1,6 +1,6 @@
 # Entra IAM Lab
 
-Hands-on Microsoft Entra ID lab in a real tenant: users, groups, P2 licensing, Conditional Access MFA on a security group, a leaver offboard, and one enterprise app SAML SSO.
+Hands-on Microsoft Entra ID lab in a real tenant: users, groups, P2 licensing, Conditional Access MFA on a security group, a leaver offboard, SAML SSO, and OIDC (jwt.ms).
 
 Only items with a dump are marked done. Finish-user screens that showed temporary passwords were not used. AD and Okta live in other repos.
 
@@ -12,7 +12,7 @@ Only items with a dump are marked done. Finish-user screens that showed temporar
 | 2 | testuser, leaver, MFA-Test-Group | Done (2 Sep 2026) |
 | 3 | Conditional Access / MFA on MFA-Test-Group | Done (3 Sep 2026) |
 | 4 | Offboard leaver | Done (3 Sep 2026) |
-| 5 | One enterprise app (SAML) — Microsoft Entra SAML Toolkit | Done (3 Sep 2026) |
+| 5 | Enterprise apps: SAML Toolkit + OIDC Lab App (jwt.ms) | Done (SAML 3 Sep; OIDC 4 Sep 2026) |
 
 ## Environment
 
@@ -32,6 +32,8 @@ Only items with a dump are marked done. Finish-user screens that showed temporar
 | Enterprise app | `Microsoft Entra SAML Toolkit` — gallery enterprise app, Object ID `93e51ff6-c0b9-4e30-9906-8d578688414f` |
 | SAML SSO | Identifier `https://samltoolkit.azurewebsites.net`; Reply `https://samltoolkit.azurewebsites.net/SAML/Consume/22318`; Sign on `https://samltoolkit.azurewebsites.net/SAML/Login/22318` |
 | App assignment | `MFA-Test-Group` assigned (role `msiam_access`) |
+| OIDC app registration | `Entra OIDC Lab App` — client ID `9c1710cc-9979-4887-8f8c-88ac4b35fa1b`, redirect `https://jwt.ms`, ID tokens enabled |
+| OIDC enterprise app | Assignment required **Yes**; `MFA-Test-Group` assigned (Default Access); admin consent Microsoft Graph `User.Read` |
 
 ## Screenshots (2 Sep 2026 dump)
 
@@ -71,6 +73,18 @@ Only items with a dump are marked done. Finish-user screens that showed temporar
 - [SP Login URL 22318](screenshots/42-saml-login-22318.png)
 - [SSO proof: Toolkit signed in as testuser](screenshots/43-saml-sso-proof-testuser.png)
 
+
+## Screenshots (4 Sep 2026 OIDC dump)
+
+- [Entra OIDC Lab App created](screenshots/44-oidc-lab-app-created.png)
+- [Redirect URI https://jwt.ms](screenshots/45-oidc-redirect-jwt-ms.png)
+- [ID tokens enabled](screenshots/46-oidc-id-tokens-enabled.png)
+- [MFA-Test-Group assigned to OIDC app](screenshots/47-oidc-mfa-test-group-assigned.png)
+- [Assignment required Yes](screenshots/48-oidc-assignment-required-yes.png)
+- [Admin consent User.Read granted](screenshots/49-oidc-admin-consent-user-read.png)
+- [jwt.ms ID token](screenshots/50-jwt-ms-id-token.png)
+- [jwt.ms decoded: testuser, aud=client, ver 2.0](screenshots/51-jwt-ms-decoded-testuser.png)
+
 ## What was built
 
 1. Confirmed the P2 Managed Trial on **Products** (expires Sep 30, 2026).
@@ -86,6 +100,10 @@ Only items with a dump are marked done. Finish-user screens that showed temporar
 10. Configured SAML SSO: Identifier `https://samltoolkit.azurewebsites.net`, Reply `/SAML/Consume/22318`, Sign on `/SAML/Login/22318`. Saved successfully.
 11. On the Toolkit site as **testuser**, created SP SAML config **22318** (Login URL, Entra Identifier, Logout URL, cert).
 12. Proved SSO from InPrivate **myapps.microsoft.com** as testuser: Toolkit tile → Login/22318 → signed in as `testuser@salamraghegmail.onmicrosoft.com`.
+
+13. Created app registration **Entra OIDC Lab App** (client `9c1710cc-9979-4887-8f8c-88ac4b35fa1b`). Web redirect `https://jwt.ms`. Enabled **ID tokens**.
+14. Enterprise app: assigned **MFA-Test-Group**, set **Assignment required** to Yes. Granted admin consent for Microsoft Graph **User.Read**.
+15. Proved OIDC as **testuser** at jwt.ms: ID token decoded with `preferred_username` `testuser@salamraghegmail.onmicrosoft.com`, `aud` matching the client ID, `ver` `2.0`.
 
 ## How to redo it
 
@@ -122,7 +140,16 @@ Enterprise app SAML:
 17. In a browser as **testuser**, open `https://samltoolkit.azurewebsites.net`, register/sign in matching the UPN, **SAML Configuration → Create**, paste IdP values and upload the cert. Note Login/Consume **22318**. Paste those URLs back into Entra Basic SAML if needed and Save.
 18. InPrivate: `https://myapps.microsoft.com` as testuser → **Microsoft Entra SAML Toolkit** → Log in on Login/22318. Expect Toolkit home signed in as testuser.
 
-Docs used: [Create users](https://learn.microsoft.com/en-us/entra/fundamentals/how-to-create-delete-users), [Manage groups](https://learn.microsoft.com/en-us/entra/fundamentals/how-to-manage-groups), [Assign licenses](https://learn.microsoft.com/en-us/microsoft-365/admin/manage/assign-licenses-to-users), [Security defaults](https://learn.microsoft.com/en-us/entra/fundamentals/security-defaults), [Conditional Access](https://learn.microsoft.com/en-us/entra/identity/conditional-access/overview), [What if](https://learn.microsoft.com/en-us/entra/identity/conditional-access/what-if-tool), [Revoke sessions](https://learn.microsoft.com/en-us/entra/identity/users/users-revoke-access).
+
+OIDC (jwt.ms):
+
+19. **App registrations → New registration.** Name `Entra OIDC Lab App`, single tenant. Note the client ID.
+20. **Authentication:** Add Web redirect URI `https://jwt.ms`. Settings: enable **ID tokens**. Save.
+21. **API permissions:** Microsoft Graph delegated `User.Read` → **Grant admin consent for Default Directory**.
+22. **Enterprise applications → Entra OIDC Lab App → Users and groups:** assign **MFA-Test-Group**. **Properties:** Assignment required = Yes. Save.
+23. InPrivate as testuser: authorize against the app (openid profile) with redirect `https://jwt.ms`. Confirm decoded ID token `preferred_username`, `aud`, `ver` 2.0.
+
+Docs used: [Create users](https://learn.microsoft.com/en-us/entra/fundamentals/how-to-create-delete-users), [Manage groups](https://learn.microsoft.com/en-us/entra/fundamentals/how-to-manage-groups), [Assign licenses](https://learn.microsoft.com/en-us/microsoft-365/admin/manage/assign-licenses-to-users), [Security defaults](https://learn.microsoft.com/en-us/entra/fundamentals/security-defaults), [Conditional Access](https://learn.microsoft.com/en-us/entra/identity/conditional-access/overview), [What if](https://learn.microsoft.com/en-us/entra/identity/conditional-access/what-if-tool), [OpenID Connect](https://learn.microsoft.com/en-us/entra/identity-platform/v2-protocols-oidc), [jwt.ms](https://jwt.ms), [Revoke sessions](https://learn.microsoft.com/en-us/entra/identity/users/users-revoke-access).
 
 ## What broke
 
@@ -136,6 +163,8 @@ Docs used: [Create users](https://learn.microsoft.com/en-us/entra/fundamentals/h
 
 - **Toolkit connection id comes after SP create.** Early Basic SAML drafts used Reply `/SAML/Consume` without `/22318`. Final saved config uses Consume/Login **22318** after the Toolkit SP config row existed.
 - **Gallery Test SSO vs My Apps proof.** Sitting used InPrivate My Apps as testuser for end-user SSO proof instead of relying only on the admin Test blade.
+
+- **Need admin approval before consent.** testuser hit “Need admin approval” for Entra OIDC Lab App until labadmin granted admin consent for `User.Read`. After grant, jwt.ms ID token proof succeeded.
 
 ## Demo walkthrough
 
@@ -151,7 +180,11 @@ Walk this in entra.microsoft.com and admin.microsoft.com, not a slide deck.
 7. **Enterprise applications → Microsoft Entra SAML Toolkit:** Users and groups shows MFA-Test-Group. Single sign-on shows Identifier, Reply Consume/22318, Sign on Login/22318.
 8. **My Apps InPrivate as testuser:** Toolkit tile → Login/22318 → signed in on the Toolkit home page.
 
-Stop there. This dump does not show OIDC or a second enterprise app. AD and Okta are other repos.
+9. **App registrations → Entra OIDC Lab App:** client ID, redirect jwt.ms, ID tokens on, User.Read granted.
+10. **Enterprise app Properties / Users and groups:** Assignment required Yes; MFA-Test-Group assigned.
+11. **jwt.ms as testuser:** decoded ID token preferred_username, aud = client ID, ver 2.0.
+
+Stop there. AD and Okta are other repos.
 
 ## Dated progress
 
