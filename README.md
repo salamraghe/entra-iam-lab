@@ -1,6 +1,6 @@
 # Entra IAM Lab
 
-Hands-on Microsoft Entra ID lab in a real tenant: users, groups, P2 licensing, Conditional Access MFA on a security group, and a leaver offboard.
+Hands-on Microsoft Entra ID lab in a real tenant: users, groups, P2 licensing, Conditional Access MFA on a security group, a leaver offboard, and one enterprise app SAML SSO.
 
 Only items with a dump are marked done. Finish-user screens that showed temporary passwords were not used. AD and Okta live in other repos.
 
@@ -12,7 +12,7 @@ Only items with a dump are marked done. Finish-user screens that showed temporar
 | 2 | testuser, leaver, MFA-Test-Group | Done (2 Sep 2026) |
 | 3 | Conditional Access / MFA on MFA-Test-Group | Done (3 Sep 2026) |
 | 4 | Offboard leaver | Done (3 Sep 2026) |
-| 5 | One enterprise app (SAML or OIDC) | Not dumped |
+| 5 | One enterprise app (SAML) — Microsoft Entra SAML Toolkit | Done (3 Sep 2026) |
 
 ## Environment
 
@@ -29,6 +29,9 @@ Only items with a dump are marked done. Finish-user screens that showed temporar
 | leaver | `Leaver@salamraghegmail.onmicrosoft.com` — Disabled, sessions revoked, P2 unassigned, 0 groups |
 | guest | `salamraghe_gmail.com#EXT#@salamraghegmail.onmicrosoft.com` |
 | Group | `MFA-Test-Group` — Security, cloud, role assignment disabled, description `Users required to use MFA in the lab`, created Sep 2, 2026 8:29 PM |
+| Enterprise app | `Microsoft Entra SAML Toolkit` — gallery enterprise app, Object ID `93e51ff6-c0b9-4e30-9906-8d578688414f` |
+| SAML SSO | Identifier `https://samltoolkit.azurewebsites.net`; Reply `https://samltoolkit.azurewebsites.net/SAML/Consume/22318`; Sign on `https://samltoolkit.azurewebsites.net/SAML/Login/22318` |
+| App assignment | `MFA-Test-Group` assigned (role `msiam_access`) |
 
 ## Screenshots (2 Sep 2026 dump)
 
@@ -57,6 +60,17 @@ Only items with a dump are marked done. Finish-user screens that showed temporar
 - [Leaver sessions revoked](screenshots/35-leaver-sessions-revoked.png)
 - [P2 unassigned from leaver; Test User still licensed](screenshots/36-p2-unassigned-testuser-licensed.png)
 
+
+## Screenshots (3 Sep 2026 SAML dump)
+
+- [Microsoft Entra SAML Toolkit added](screenshots/37-saml-toolkit-app-added.png)
+- [MFA-Test-Group assigned to the app](screenshots/38-saml-mfa-test-group-assigned.png)
+- [Basic SAML saved: Consume/Login 22318](screenshots/39-saml-basic-config-22318-saved.png)
+- [Toolkit SP config 22318](screenshots/40-saml-toolkit-sp-config-22318.png)
+- [My Apps InPrivate: Toolkit tile as testuser](screenshots/41-myapps-testuser-toolkit-tile.png)
+- [SP Login URL 22318](screenshots/42-saml-login-22318.png)
+- [SSO proof: Toolkit signed in as testuser](screenshots/43-saml-sso-proof-testuser.png)
+
 ## What was built
 
 1. Confirmed the P2 Managed Trial on **Products** (expires Sep 30, 2026).
@@ -67,6 +81,11 @@ Only items with a dump are marked done. Finish-user screens that showed temporar
 6. Created **Require MFA for MFA-Test-Group**: include that group, All resources, Grant Require MFA. Enabled the policy (State On).
 7. Ran **What if** for Test User against Office 365 Exchange Online. The policy applies with Grant Require multifactor authentication.
 8. Offboarded **Leaver User**: account Disabled, sessions revoked, Entra ID P2 unassigned in Microsoft 365 admin center. Test User kept the license.
+
+9. Added gallery enterprise app **Microsoft Entra SAML Toolkit**. Assigned **MFA-Test-Group**.
+10. Configured SAML SSO: Identifier `https://samltoolkit.azurewebsites.net`, Reply `/SAML/Consume/22318`, Sign on `/SAML/Login/22318`. Saved successfully.
+11. On the Toolkit site as **testuser**, created SP SAML config **22318** (Login URL, Entra Identifier, Logout URL, cert).
+12. Proved SSO from InPrivate **myapps.microsoft.com** as testuser: Toolkit tile → Login/22318 → signed in as `testuser@salamraghegmail.onmicrosoft.com`.
 
 ## How to redo it
 
@@ -93,6 +112,16 @@ Offboard:
 11. **Revoke sessions.** Confirm the success toast.
 12. Unassign P2 from the M365 admin center (**Billing → Licenses → Microsoft Entra ID P2**), not the Entra user Licenses tab. Confirm leaver is gone from the assigned list and **Test User** remains.
 
+
+Enterprise app SAML:
+
+13. **Entra ID → Enterprise applications → New application → Microsoft Entra SAML Toolkit.** Create. Confirm the added-successfully toast.
+14. **Users and groups → Add user/group.** Select **MFA-Test-Group**. Assign (Default Access / `msiam_access`).
+15. **Single sign-on → SAML.** Edit Basic SAML Configuration. Identifier `https://samltoolkit.azurewebsites.net`. Reply URL `https://samltoolkit.azurewebsites.net/SAML/Consume/22318` (create the Toolkit SP config first if the connection id is not known yet). Sign on URL `https://samltoolkit.azurewebsites.net/SAML/Login/22318`. Save.
+16. Download Certificate (Base64). Copy Login URL, Microsoft Entra Identifier, Logout URL from Set up Microsoft Entra SAML Toolkit.
+17. In a browser as **testuser**, open `https://samltoolkit.azurewebsites.net`, register/sign in matching the UPN, **SAML Configuration → Create**, paste IdP values and upload the cert. Note Login/Consume **22318**. Paste those URLs back into Entra Basic SAML if needed and Save.
+18. InPrivate: `https://myapps.microsoft.com` as testuser → **Microsoft Entra SAML Toolkit** → Log in on Login/22318. Expect Toolkit home signed in as testuser.
+
 Docs used: [Create users](https://learn.microsoft.com/en-us/entra/fundamentals/how-to-create-delete-users), [Manage groups](https://learn.microsoft.com/en-us/entra/fundamentals/how-to-manage-groups), [Assign licenses](https://learn.microsoft.com/en-us/microsoft-365/admin/manage/assign-licenses-to-users), [Security defaults](https://learn.microsoft.com/en-us/entra/fundamentals/security-defaults), [Conditional Access](https://learn.microsoft.com/en-us/entra/identity/conditional-access/overview), [What if](https://learn.microsoft.com/en-us/entra/identity/conditional-access/what-if-tool), [Revoke sessions](https://learn.microsoft.com/en-us/entra/identity/users/users-revoke-access).
 
 ## What broke
@@ -105,6 +134,9 @@ Docs used: [Create users](https://learn.microsoft.com/en-us/entra/fundamentals/h
 - **Active groups** defaulted to the **Microsoft 365 groups** tab, which stayed empty. The group is a **Security group**.
 - **MFA-Test-Group** started at 0 members. Member add is a separate step after create. 3 Sep dump did not reopen the members list; membership proof remains the 2 Sep member shot. What if applying to Test User is consistent with that membership.
 
+- **Toolkit connection id comes after SP create.** Early Basic SAML drafts used Reply `/SAML/Consume` without `/22318`. Final saved config uses Consume/Login **22318** after the Toolkit SP config row existed.
+- **Gallery Test SSO vs My Apps proof.** Sitting used InPrivate My Apps as testuser for end-user SSO proof instead of relying only on the admin Test blade.
+
 ## Hiring screen-share
 
 Walk this in entra.microsoft.com and admin.microsoft.com, not a slide deck.
@@ -116,7 +148,10 @@ Walk this in entra.microsoft.com and admin.microsoft.com, not a slide deck.
 5. **What if:** Test User, Office 365 Exchange Online. Policy applies, Grant Require MFA.
 6. **Leaver User:** Account status Disabled. Sessions revoked toast. P2 unassigned from M365 licenses.
 
-Stop there. This dump does not show an enterprise app (SAML or OIDC).
+7. **Enterprise applications → Microsoft Entra SAML Toolkit:** Users and groups shows MFA-Test-Group. Single sign-on shows Identifier, Reply Consume/22318, Sign on Login/22318.
+8. **My Apps InPrivate as testuser:** Toolkit tile → Login/22318 → signed in on the Toolkit home page.
+
+Stop there. This dump does not show OIDC or a second enterprise app. AD and Okta are other repos.
 
 ## Dated progress
 
@@ -131,3 +166,4 @@ Stop there. This dump does not show an enterprise app (SAML or OIDC).
 | 2026-09-03 2:25 PM | Policy modified; later list shows State On |
 | 2026-09-03 ~3:07–3:46 PM | What if Test User: policy applies, Grant Require MFA, State On |
 | 2026-09-03 ~3:46 PM | Leaver Disabled, sessions revoked, P2 unassigned. Test User still licensed |
+| 2026-09-03 ~4:17–5:03 PM | Microsoft Entra SAML Toolkit created; MFA-Test-Group assigned; SAML Consume/Login 22318 saved; Toolkit SP config 22318; InPrivate My Apps SSO as testuser |
