@@ -1,5 +1,7 @@
 # Entra IAM Lab
 
+Hands-on lab, Sep 2026.
+
 Hands-on Microsoft Entra ID lab in a real tenant: users, groups, P2 licensing, Conditional Access MFA on a security group, a leaver offboard, SAML SSO, and OIDC (jwt.ms).
 
 Only items with a dump are marked done. Finish-user screens that showed temporary passwords were not used. AD and Okta live in other repos.
