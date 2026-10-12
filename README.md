@@ -48,6 +48,9 @@ Only items with a dump are marked done. Finish-user screens that showed temporar
 - [Add members picker](screenshots/22-add-members-picker.png)
 - [testuser is the member](screenshots/23-testuser-member.png)
 
+  ![testuser is the member](hero/23-testuser-member.png)
+
+
 ## Screenshots (3 Sep 2026 dump)
 
 - [CA create blocked until security defaults are disabled](screenshots/24-ca-blocked-by-security-defaults.png)
@@ -58,10 +61,22 @@ Only items with a dump are marked done. Finish-user screens that showed temporar
 - [Policy details: 1 group, All resources, Require MFA](screenshots/29-policy-details-one-group.png)
 - [Enable toast vs list still Report-only](screenshots/30-policy-enable-toast-list-lag.png)
 - [Policy State On](screenshots/31-policy-state-on.png)
+
+  ![Policy State On](hero/31-policy-state-on.png)
+
 - [What if: Test User, Office 365 Exchange Online](screenshots/32-what-if-testuser-exo.png)
 - [What if: policy applies, Grant Require MFA, State On](screenshots/33-what-if-require-mfa-applies.png)
+
+  ![What if: policy applies, Grant Require MFA, State On](hero/33-what-if-require-mfa-applies.png)
+
 - [Leaver User Disabled](screenshots/34-leaver-disabled.png)
+
+  ![Leaver User Disabled](hero/34-leaver-disabled.png)
+
 - [Leaver sessions revoked](screenshots/35-leaver-sessions-revoked.png)
+
+  ![Leaver sessions revoked](hero/35-leaver-sessions-revoked.png)
+
 - [P2 unassigned from leaver; Test User still licensed](screenshots/36-p2-unassigned-testuser-licensed.png)
 
 
@@ -75,6 +90,9 @@ Only items with a dump are marked done. Finish-user screens that showed temporar
 - [SP Login URL 22318](screenshots/42-saml-login-22318.png)
 - [SSO proof: Toolkit signed in as testuser](screenshots/43-saml-sso-proof-testuser.png)
 
+  ![SSO proof: Toolkit signed in as testuser](hero/43-saml-sso-proof-testuser.png)
+
+
 
 ## Screenshots (4 Sep 2026 OIDC dump)
 
@@ -83,9 +101,15 @@ Only items with a dump are marked done. Finish-user screens that showed temporar
 - [ID tokens enabled](screenshots/46-oidc-id-tokens-enabled.png)
 - [MFA-Test-Group assigned to OIDC app](screenshots/47-oidc-mfa-test-group-assigned.png)
 - [Assignment required Yes](screenshots/48-oidc-assignment-required-yes.png)
+
+  ![Assignment required Yes](hero/48-oidc-assignment-required-yes.png)
+
 - [Admin consent User.Read granted](screenshots/49-oidc-admin-consent-user-read.png)
 - [jwt.ms ID token](screenshots/50-jwt-ms-id-token.png)
 - [jwt.ms decoded: testuser, aud=client, ver 2.0](screenshots/51-jwt-ms-decoded-testuser.png)
+
+  ![jwt.ms decoded: testuser, aud=client, ver 2.0](hero/51-jwt-ms-decoded-testuser.png)
+
 
 ## What was built
 
