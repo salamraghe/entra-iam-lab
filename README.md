@@ -37,7 +37,9 @@ Only items with a dump are marked done. Finish-user screens that showed temporar
 | OIDC app registration | `Entra OIDC Lab App` — client ID `9c1710cc-9979-4887-8f8c-88ac4b35fa1b`, redirect `https://jwt.ms`, ID tokens enabled |
 | OIDC enterprise app | Assignment required **Yes**; `MFA-Test-Group` assigned (Default Access); admin consent Microsoft Graph `User.Read` |
 
-## Screenshots (2 Sep 2026 dump)
+## Screenshots
+
+### Screenshots (2 Sep 2026 dump)
 
 - [Users list](screenshots/01-admin-center-users.png)
 - [P2 trial on Products](screenshots/02-p2-trial-products.png)
@@ -51,7 +53,7 @@ Only items with a dump are marked done. Finish-user screens that showed temporar
   ![testuser is the member](hero/23-testuser-member.png)
 
 
-## Screenshots (3 Sep 2026 dump)
+### Screenshots (3 Sep 2026 dump)
 
 - [CA create blocked until security defaults are disabled](screenshots/24-ca-blocked-by-security-defaults.png)
 - [Security defaults set to Disabled](screenshots/25-security-defaults-disabled.png)
@@ -80,7 +82,7 @@ Only items with a dump are marked done. Finish-user screens that showed temporar
 - [P2 unassigned from leaver; Test User still licensed](screenshots/36-p2-unassigned-testuser-licensed.png)
 
 
-## Screenshots (3 Sep 2026 SAML dump)
+### Screenshots (3 Sep 2026 SAML dump)
 
 - [Microsoft Entra SAML Toolkit added](screenshots/37-saml-toolkit-app-added.png)
 - [MFA-Test-Group assigned to the app](screenshots/38-saml-mfa-test-group-assigned.png)
@@ -94,7 +96,7 @@ Only items with a dump are marked done. Finish-user screens that showed temporar
 
 
 
-## Screenshots (4 Sep 2026 OIDC dump)
+### Screenshots (4 Sep 2026 OIDC dump)
 
 - [Entra OIDC Lab App created](screenshots/44-oidc-lab-app-created.png)
 - [Redirect URI https://jwt.ms](screenshots/45-oidc-redirect-jwt-ms.png)
@@ -177,7 +179,7 @@ OIDC (jwt.ms):
 
 Docs used: [Create users](https://learn.microsoft.com/en-us/entra/fundamentals/how-to-create-delete-users), [Manage groups](https://learn.microsoft.com/en-us/entra/fundamentals/how-to-manage-groups), [Assign licenses](https://learn.microsoft.com/en-us/microsoft-365/admin/manage/assign-licenses-to-users), [Security defaults](https://learn.microsoft.com/en-us/entra/fundamentals/security-defaults), [Conditional Access](https://learn.microsoft.com/en-us/entra/identity/conditional-access/overview), [What if](https://learn.microsoft.com/en-us/entra/identity/conditional-access/what-if-tool), [OpenID Connect](https://learn.microsoft.com/en-us/entra/identity-platform/v2-protocols-oidc), [jwt.ms](https://jwt.ms), [Revoke sessions](https://learn.microsoft.com/en-us/entra/identity/users/users-revoke-access).
 
-## What broke
+## What broke / Issues I fixed
 
 - **Security defaults blocked the New policy form** with “You must first disable security defaults.” Defaults started Enabled. The dump shows the dropdown set to Disabled; the Save click after picking a reason was not captured. Policy create after that is the proof they were off.
 - **Policy list lagged after enable.** Toast: “Successfully updated Require MFA for MFA-Test-Group. Policy will be enabled in a few minutes.” The same sitting’s list still showed **Report-only**. Later refresh (3 Sep, modified 2:25 PM) shows State **On**.
@@ -226,3 +228,7 @@ Stop there. AD and Okta are other repos.
 | 2026-09-03 ~3:07–3:46 PM | What if Test User: policy applies, Grant Require MFA, State On |
 | 2026-09-03 ~3:46 PM | Leaver Disabled, sessions revoked, P2 unassigned. Test User still licensed |
 | 2026-09-03 ~4:17–5:03 PM | Microsoft Entra SAML Toolkit created; MFA-Test-Group assigned; SAML Consume/Login 22318 saved; Toolkit SP config 22318; InPrivate My Apps SSO as testuser |
+
+## Stop there
+
+Okta, AD lifecycle, CyberKy/LLDAP, and CyberArk are other sittings / other repos. This package covers Entra only.
