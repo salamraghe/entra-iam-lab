@@ -2,233 +2,128 @@
 
 Hands-on lab, Sep 2026.
 
-Hands-on Microsoft Entra ID lab in a real tenant: users, groups, P2 licensing, Conditional Access MFA on a security group, a leaver offboard, SAML SSO, and OIDC (jwt.ms).
+This is the everyday Microsoft Entra ID work behind access tickets, done in a real tenant: create users, put them in a security group, force MFA on that group with Conditional Access, offboard a leaver, then hook up two apps with single sign-on (SAML and OIDC). The group is what everything hangs on: it decides who gets MFA and who can open the apps. Tenant names, UPNs and IDs are blacked out in the screenshots.
 
-Only items with a dump are marked done. Finish-user screens that showed temporary passwords were not used. AD and Okta live in other repos.
+## What I built
 
-## Scope
+1. **Users and licensing:** Test User and Leaver User on an Entra ID P2 trial. Test User is a normal user with no admin role.
+2. **Group:** security group **MFA-Test-Group** with Test User as the only member.
+3. **Conditional Access:** policy **Require MFA for MFA-Test-Group** (All resources, Grant: Require multifactor authentication), State **On**. The What If tool confirms it applies to Test User.
+4. **Leaver offboard:** disabled Leaver User, revoked their sign-in sessions, and removed the P2 license in the Microsoft 365 admin center. Test User kept theirs.
+5. **SAML SSO:** added the Microsoft Entra SAML Toolkit app, assigned MFA-Test-Group, saved the SAML config, and signed in as Test User from My Apps.
+6. **OIDC:** registered **Entra OIDC Lab App** with redirect `https://jwt.ms` and ID tokens on, assigned MFA-Test-Group with Assignment required = Yes, granted admin consent for Microsoft Graph `User.Read`, and decoded Test User's ID token at jwt.ms.
 
-| # | Item | Dump |
-| --- | --- | --- |
-| 1 | Tenant, Entra ID P2 trial, labadmin | Done (2 Sep 2026) |
-| 2 | testuser, leaver, MFA-Test-Group | Done (2 Sep 2026) |
-| 3 | Conditional Access / MFA on MFA-Test-Group | Done (3 Sep 2026) |
-| 4 | Offboard leaver | Done (3 Sep 2026) |
-| 5 | Enterprise apps: SAML Toolkit + OIDC Lab App (jwt.ms) | Done (SAML 3 Sep; OIDC 4 Sep 2026) |
+## What I learned
+
+*Interview line (coach-written at his request, from his one-page IAM Labs doc):*
+
+> "In Entra I required MFA for a test group with Conditional Access and gave that group SSO to a SAML app and an OIDC app. For a leaver, I disabled the account, revoked sessions, and removed the license and groups."
+
+## Key screenshots
+
+![](key/01-testuser-in-mfa-test-group.png)
+Test User added as a member of MFA-Test-Group in Entra ID.
+
+![](key/02-error-security-defaults-block-ca.png)
+Error I hit: Security Defaults blocked Conditional Access until I turned it off.
+
+![](key/03-ca-policy-on.png)
+Conditional Access policy requiring MFA for MFA-Test-Group is turned on.
+
+![](key/04-what-if-mfa-applies.png)
+What If tool confirms the MFA policy applies to Test User.
+
+![](key/05-leaver-disabled.png)
+Leaver account disabled in Entra ID, confirmed by the success toast.
+
+![](key/06-leaver-sessions-revoked.png)
+Revoked the leaver's sign-in sessions so existing logins stop working.
+
+![](key/07-saml-sso-success.png)
+SAML Toolkit app signed Test User in through Entra single sign-on.
+
+![](key/08-oidc-token-decoded.png)
+Decoded OIDC ID token for Test User (name and ver 2.0 shown; IDs and username blacked out).
 
 ## Environment
 
 | Object | Value |
 | --- | --- |
-| Tenant | Default Directory, `salamraghegmail.onmicrosoft.com` |
-| Portal | Microsoft Entra admin center and Microsoft 365 admin center, signed in as Lab Admin |
-| P2 trial | Microsoft Entra ID P2 Managed Trial, Active, purchased quantity 100, expires **Sep 30, 2026** |
-| Also listed | Microsoft Entra ID Free (purchased quantity 1) |
-| Security defaults | Disabled (required before a Conditional Access policy can be created) |
-| CA policy | `Require MFA for MFA-Test-Group` — State **On**, include `MFA-Test-Group`, All resources, Grant Require multifactor authentication. Created 3 Sep 2026 2:20 PM, modified 2:25 PM |
-| labadmin | `labadmin@salamraghegmail.onmicrosoft.com` |
-| testuser | `testuser@salamraghegmail.onmicrosoft.com` — Entra ID P2 still assigned, role User, member of MFA-Test-Group |
-| leaver | `Leaver@salamraghegmail.onmicrosoft.com` — Disabled, sessions revoked, P2 unassigned, 0 groups |
-| guest | `salamraghe_gmail.com#EXT#@salamraghegmail.onmicrosoft.com` |
-| Group | `MFA-Test-Group` — Security, cloud, role assignment disabled, description `Users required to use MFA in the lab`, created Sep 2, 2026 8:29 PM |
-| Enterprise app | `Microsoft Entra SAML Toolkit` — gallery enterprise app, Object ID `93e51ff6-c0b9-4e30-9906-8d578688414f` |
-| SAML SSO | Identifier `https://samltoolkit.azurewebsites.net`; Reply `https://samltoolkit.azurewebsites.net/SAML/Consume/22318`; Sign on `https://samltoolkit.azurewebsites.net/SAML/Login/22318` |
-| App assignment | `MFA-Test-Group` assigned (role `msiam_access`) |
-| OIDC app registration | `Entra OIDC Lab App` — client ID `9c1710cc-9979-4887-8f8c-88ac4b35fa1b`, redirect `https://jwt.ms`, ID tokens enabled |
-| OIDC enterprise app | Assignment required **Yes**; `MFA-Test-Group` assigned (Default Access); admin consent Microsoft Graph `User.Read` |
+| Tenant | Microsoft Entra ID, Default Directory (name hidden) |
+| Licensing | Microsoft Entra ID P2 Managed Trial |
+| Group | **MFA-Test-Group** (Security, cloud, role assignment off) |
+| CA policy | **Require MFA for MFA-Test-Group**, All resources, Require MFA, State On |
+| SAML app | Microsoft Entra SAML Toolkit, connection 22318, MFA-Test-Group assigned |
+| OIDC app | Entra OIDC Lab App, redirect `https://jwt.ms`, ID tokens on, `User.Read` consented |
 
-## Screenshots
+## What broke / issues I fixed
 
-### Screenshots (2 Sep 2026 dump)
+- **Security defaults blocked the new policy.** The CA form said "You must first disable security defaults." I set Security defaults to Disabled, and then the policy could be created.
+- **Policy list lagged after enabling.** The toast said the policy "will be enabled in a few minutes" while the list still showed Report-only. A later refresh shows State On.
+- **License removal lives in the M365 admin center.** The Entra user Licenses tab can't unassign, so I removed P2 under Billing > Licenses there.
+- **SAML connection ID comes after the Toolkit config.** The final Reply and Sign on URLs use Consume/Login **22318** once the Toolkit SP config existed.
+- **OIDC needed admin consent.** Test User hit "Need admin approval" until I granted admin consent for `User.Read`.
 
-- [Users list](screenshots/01-admin-center-users.png)
-- [P2 trial on Products](screenshots/02-p2-trial-products.png)
-- [Test User review / P2 assigned](screenshots/06-testuser-review.png)
-- [MFA-Test-Group review](screenshots/16-group-review.png)
-- [MFA-Test-Group created](screenshots/17-group-created.png)
-- [Security groups list](screenshots/18-security-groups-list.png)
-- [Add members picker](screenshots/22-add-members-picker.png)
-- [testuser is the member](screenshots/23-testuser-member.png)
+## Gaps
 
-  ![testuser is the member](hero/23-testuser-member.png)
+- **No live MFA prompt screenshot.** Sign-in logs showed no interactive sign-ins for Test User. The proof that the policy hits Test User is What If, not an MFA challenge.
+- The Save click after picking a reason for disabling security defaults wasn't captured. The policy being created afterward is the proof they were off.
+- The raw jwt.ms token shot was left out. The encoded token can be decoded back to tenant and object IDs, and blacking it out leaves nothing to see.
 
+<details><summary>Full proof (all screenshots)</summary>
 
-### Screenshots (3 Sep 2026 dump)
+![](full-proof/01-admin-center-users.png)
 
-- [CA create blocked until security defaults are disabled](screenshots/24-ca-blocked-by-security-defaults.png)
-- [Security defaults set to Disabled](screenshots/25-security-defaults-disabled.png)
-- [Policy includes MFA-Test-Group](screenshots/26-policy-include-mfa-test-group.png)
-- [Target resources: All resources](screenshots/27-policy-all-resources.png)
-- [Grant: Require multifactor authentication](screenshots/28-grant-require-mfa.png)
-- [Policy details: 1 group, All resources, Require MFA](screenshots/29-policy-details-one-group.png)
-- [Enable toast vs list still Report-only](screenshots/30-policy-enable-toast-list-lag.png)
-- [Policy State On](screenshots/31-policy-state-on.png)
+![](full-proof/02-p2-trial-products.png)
 
-  ![Policy State On](hero/31-policy-state-on.png)
+![](full-proof/06-testuser-review.png)
 
-- [What if: Test User, Office 365 Exchange Online](screenshots/32-what-if-testuser-exo.png)
-- [What if: policy applies, Grant Require MFA, State On](screenshots/33-what-if-require-mfa-applies.png)
+![](full-proof/16-group-review.png)
 
-  ![What if: policy applies, Grant Require MFA, State On](hero/33-what-if-require-mfa-applies.png)
+![](full-proof/17-group-created.png)
 
-- [Leaver User Disabled](screenshots/34-leaver-disabled.png)
+![](full-proof/18-security-groups-list.png)
 
-  ![Leaver User Disabled](hero/34-leaver-disabled.png)
+![](full-proof/22-add-members-picker.png)
 
-- [Leaver sessions revoked](screenshots/35-leaver-sessions-revoked.png)
+![](full-proof/25-security-defaults-disabled.png)
 
-  ![Leaver sessions revoked](hero/35-leaver-sessions-revoked.png)
+![](full-proof/26-policy-include-mfa-test-group.png)
 
-- [P2 unassigned from leaver; Test User still licensed](screenshots/36-p2-unassigned-testuser-licensed.png)
+![](full-proof/27-policy-all-resources.png)
 
+![](full-proof/28-grant-require-mfa.png)
 
-### Screenshots (3 Sep 2026 SAML dump)
+![](full-proof/29-policy-details-one-group.png)
 
-- [Microsoft Entra SAML Toolkit added](screenshots/37-saml-toolkit-app-added.png)
-- [MFA-Test-Group assigned to the app](screenshots/38-saml-mfa-test-group-assigned.png)
-- [Basic SAML saved: Consume/Login 22318](screenshots/39-saml-basic-config-22318-saved.png)
-- [Toolkit SP config 22318](screenshots/40-saml-toolkit-sp-config-22318.png)
-- [My Apps InPrivate: Toolkit tile as testuser](screenshots/41-myapps-testuser-toolkit-tile.png)
-- [SP Login URL 22318](screenshots/42-saml-login-22318.png)
-- [SSO proof: Toolkit signed in as testuser](screenshots/43-saml-sso-proof-testuser.png)
+![](full-proof/30-policy-enable-toast-list-lag.png)
 
-  ![SSO proof: Toolkit signed in as testuser](hero/43-saml-sso-proof-testuser.png)
+![](full-proof/32-what-if-testuser-exo.png)
 
+![](full-proof/36-p2-unassigned-testuser-licensed.png)
 
+![](full-proof/37-saml-toolkit-app-added.png)
 
-### Screenshots (4 Sep 2026 OIDC dump)
+![](full-proof/38-saml-mfa-test-group-assigned.png)
 
-- [Entra OIDC Lab App created](screenshots/44-oidc-lab-app-created.png)
-- [Redirect URI https://jwt.ms](screenshots/45-oidc-redirect-jwt-ms.png)
-- [ID tokens enabled](screenshots/46-oidc-id-tokens-enabled.png)
-- [MFA-Test-Group assigned to OIDC app](screenshots/47-oidc-mfa-test-group-assigned.png)
-- [Assignment required Yes](screenshots/48-oidc-assignment-required-yes.png)
+![](full-proof/39-saml-basic-config-22318-saved.png)
 
-  ![Assignment required Yes](hero/48-oidc-assignment-required-yes.png)
+![](full-proof/40-saml-toolkit-sp-config-22318.png)
 
-- [Admin consent User.Read granted](screenshots/49-oidc-admin-consent-user-read.png)
-- [jwt.ms ID token](screenshots/50-jwt-ms-id-token.png)
-- [jwt.ms decoded: testuser, aud=client, ver 2.0](screenshots/51-jwt-ms-decoded-testuser.png)
+![](full-proof/41-myapps-testuser-toolkit-tile.png)
 
-  ![jwt.ms decoded: testuser, aud=client, ver 2.0](hero/51-jwt-ms-decoded-testuser.png)
+![](full-proof/42-saml-login-22318.png)
 
+![](full-proof/44-oidc-lab-app-created.png)
 
-## What was built
+![](full-proof/45-oidc-redirect-jwt-ms.png)
 
-1. Confirmed the P2 Managed Trial on **Products** (expires Sep 30, 2026).
-2. Created **Test User** with Entra ID P2 and no admin role.
-3. Created **Leaver User**. Same P2. Not added to the group.
-4. Created security group **MFA-Test-Group**. Role assignment left off. Added **testuser** as the only member.
-5. Disabled **security defaults** so a custom Conditional Access policy could be created.
-6. Created **Require MFA for MFA-Test-Group**: include that group, All resources, Grant Require MFA. Enabled the policy (State On).
-7. Ran **What if** for Test User against Office 365 Exchange Online. The policy applies with Grant Require multifactor authentication.
-8. Offboarded **Leaver User**: account Disabled, sessions revoked, Entra ID P2 unassigned in Microsoft 365 admin center. Test User kept the license.
+![](full-proof/46-oidc-id-tokens-enabled.png)
 
-9. Added gallery enterprise app **Microsoft Entra SAML Toolkit**. Assigned **MFA-Test-Group**.
-10. Configured SAML SSO: Identifier `https://samltoolkit.azurewebsites.net`, Reply `/SAML/Consume/22318`, Sign on `/SAML/Login/22318`. Saved successfully.
-11. On the Toolkit site as **testuser**, created SP SAML config **22318** (Login URL, Entra Identifier, Logout URL, cert).
-12. Proved SSO from InPrivate **myapps.microsoft.com** as testuser: Toolkit tile → Login/22318 → signed in as `testuser@salamraghegmail.onmicrosoft.com`.
+![](full-proof/47-oidc-mfa-test-group-assigned.png)
 
-13. Created app registration **Entra OIDC Lab App** (client `9c1710cc-9979-4887-8f8c-88ac4b35fa1b`). Web redirect `https://jwt.ms`. Enabled **ID tokens**.
-14. Enterprise app: assigned **MFA-Test-Group**, set **Assignment required** to Yes. Granted admin consent for Microsoft Graph **User.Read**.
-15. Proved OIDC as **testuser** at jwt.ms: ID token decoded with `preferred_username` `testuser@salamraghegmail.onmicrosoft.com`, `aud` matching the client ID, `ver` `2.0`.
+![](full-proof/48-oidc-assignment-required-yes.png)
 
-## How to redo it
+![](full-proof/49-oidc-admin-consent-user-read.png)
 
-Portals: [admin.microsoft.com](https://admin.microsoft.com) and [entra.microsoft.com](https://entra.microsoft.com) as `labadmin@salamraghegmail.onmicrosoft.com`.
-
-Track 0 (users and group):
-
-1. **Home → Your organization → Products.** Confirm **Microsoft Entra ID P2 Managed Trial** is Active and note the expiration date.
-2. **Add user.** Basics: display name Test User, username `testuser`, domain `salamraghegmail.onmicrosoft.com`. Product licenses: assign **Microsoft Entra ID P2**, location United States. Optional settings: leave **Roles** as User (no administration access). Review and finish.
-3. Repeat Add user for **Leaver User** / `Leaver`. Same P2 license. Do not make this account an admin.
-4. **Groups → Active groups → Security groups → Add a security group.** Name `MFA-Test-Group`. Leave **Azure AD roles can be assigned to the group** unchecked. Create.
-5. Open the group → **Members → Add members.** Select **Test User** only. Save. Do not add labadmin or leaver.
-
-Conditional Access:
-
-6. **Entra ID → Conditional Access → Policies → New policy.** If the form warns that security defaults must be disabled first, open **Properties → Manage security defaults**, set **Disabled**, choose reason **My organization is planning to use Conditional Access**, Save.
-7. Name the policy `Require MFA for MFA-Test-Group`. Users: Select users and groups → **MFA-Test-Group**. Target resources: **All resources**. Grant: **Require multifactor authentication**. Enable policy: **On**. Create / Save.
-8. Confirm the list shows State **On**. If it still says Report-only after the success toast, wait and Refresh.
-9. **What if.** Identity: Test User. Cloud app: Office 365 Exchange Online (or another All-resources app). Run What if. Expect **Require MFA for MFA-Test-Group** under policies that will apply, Grant Require multifactor authentication, State On.
-
-Offboard:
-
-10. Open **Leaver User**. Set **Account enabled** off. Save. Confirm Overview shows **Disabled**.
-11. **Revoke sessions.** Confirm the success toast.
-12. Unassign P2 from the M365 admin center (**Billing → Licenses → Microsoft Entra ID P2**), not the Entra user Licenses tab. Confirm leaver is gone from the assigned list and **Test User** remains.
-
-
-Enterprise app SAML:
-
-13. **Entra ID → Enterprise applications → New application → Microsoft Entra SAML Toolkit.** Create. Confirm the added-successfully toast.
-14. **Users and groups → Add user/group.** Select **MFA-Test-Group**. Assign (Default Access / `msiam_access`).
-15. **Single sign-on → SAML.** Edit Basic SAML Configuration. Identifier `https://samltoolkit.azurewebsites.net`. Reply URL `https://samltoolkit.azurewebsites.net/SAML/Consume/22318` (create the Toolkit SP config first if the connection id is not known yet). Sign on URL `https://samltoolkit.azurewebsites.net/SAML/Login/22318`. Save.
-16. Download Certificate (Base64). Copy Login URL, Microsoft Entra Identifier, Logout URL from Set up Microsoft Entra SAML Toolkit.
-17. In a browser as **testuser**, open `https://samltoolkit.azurewebsites.net`, register/sign in matching the UPN, **SAML Configuration → Create**, paste IdP values and upload the cert. Note Login/Consume **22318**. Paste those URLs back into Entra Basic SAML if needed and Save.
-18. InPrivate: `https://myapps.microsoft.com` as testuser → **Microsoft Entra SAML Toolkit** → Log in on Login/22318. Expect Toolkit home signed in as testuser.
-
-
-OIDC (jwt.ms):
-
-19. **App registrations → New registration.** Name `Entra OIDC Lab App`, single tenant. Note the client ID.
-20. **Authentication:** Add Web redirect URI `https://jwt.ms`. Settings: enable **ID tokens**. Save.
-21. **API permissions:** Microsoft Graph delegated `User.Read` → **Grant admin consent for Default Directory**.
-22. **Enterprise applications → Entra OIDC Lab App → Users and groups:** assign **MFA-Test-Group**. **Properties:** Assignment required = Yes. Save.
-23. InPrivate as testuser: authorize against the app (openid profile) with redirect `https://jwt.ms`. Confirm decoded ID token `preferred_username`, `aud`, `ver` 2.0.
-
-Docs used: [Create users](https://learn.microsoft.com/en-us/entra/fundamentals/how-to-create-delete-users), [Manage groups](https://learn.microsoft.com/en-us/entra/fundamentals/how-to-manage-groups), [Assign licenses](https://learn.microsoft.com/en-us/microsoft-365/admin/manage/assign-licenses-to-users), [Security defaults](https://learn.microsoft.com/en-us/entra/fundamentals/security-defaults), [Conditional Access](https://learn.microsoft.com/en-us/entra/identity/conditional-access/overview), [What if](https://learn.microsoft.com/en-us/entra/identity/conditional-access/what-if-tool), [OpenID Connect](https://learn.microsoft.com/en-us/entra/identity-platform/v2-protocols-oidc), [jwt.ms](https://jwt.ms), [Revoke sessions](https://learn.microsoft.com/en-us/entra/identity/users/users-revoke-access).
-
-## What broke / Issues I fixed
-
-- **Security defaults blocked the New policy form** with “You must first disable security defaults.” Defaults started Enabled. The dump shows the dropdown set to Disabled; the Save click after picking a reason was not captured. Policy create after that is the proof they were off.
-- **Policy list lagged after enable.** Toast: “Successfully updated Require MFA for MFA-Test-Group. Policy will be enabled in a few minutes.” The same sitting’s list still showed **Report-only**. Later refresh (3 Sep, modified 2:25 PM) shows State **On**.
-- **Entra user Licenses tab cannot unassign.** Banner: add/remove licenses only in Microsoft 365 admin center. Offboard of P2 was done there. After unassign, toast “Licenses have been unassigned successfully.” Leaver is gone from the P2 assigned list; Test User remains.
-- **No MFA challenge screenshot.** Sign-in logs filtered to `testuser@salamraghegmail.onmicrosoft.com` returned no interactive sign-ins. Proof the policy hits Test User is **What if**, not a live MFA prompt.
-- **Products tab showed 0 assigned** on 2 Sep after Test User was created with Entra ID P2 on the review screen. Treated as lag. Proof of assignment is the user wizard, then the 3 Sep P2 assigned list.
-- **Active groups** defaulted to the **Microsoft 365 groups** tab, which stayed empty. The group is a **Security group**.
-- **MFA-Test-Group** started at 0 members. Member add is a separate step after create. 3 Sep dump did not reopen the members list; membership proof remains the 2 Sep member shot. What if applying to Test User is consistent with that membership.
-
-- **Toolkit connection id comes after SP create.** Early Basic SAML drafts used Reply `/SAML/Consume` without `/22318`. Final saved config uses Consume/Login **22318** after the Toolkit SP config row existed.
-- **Gallery Test SSO vs My Apps proof.** Sitting used InPrivate My Apps as testuser for end-user SSO proof instead of relying only on the admin Test blade.
-
-- **Need admin approval before consent.** testuser hit “Need admin approval” for Entra OIDC Lab App until labadmin granted admin consent for `User.Read`. After grant, jwt.ms ID token proof succeeded.
-
-## Demo walkthrough
-
-Walk this in entra.microsoft.com and admin.microsoft.com, not a slide deck.
-
-1. **Users:** Lab Admin, Test User, Leaver User (Disabled), plus the Gmail guest. Point at testuser as a normal user with P2 and no admin role.
-2. **Products / Licenses:** P2 Managed Trial, expiration Sep 30, 2026. Test User still assigned. Leaver not on the P2 assigned list.
-3. **Groups → Security groups:** `MFA-Test-Group`, cloud, created Sep 2, 2026 8:29 PM, role assignment disabled. Test User is the member.
-4. **Conditional Access → Policies:** `Require MFA for MFA-Test-Group`, State On. Details: 1 group, All resources, Require multifactor authentication.
-5. **What if:** Test User, Office 365 Exchange Online. Policy applies, Grant Require MFA.
-6. **Leaver User:** Account status Disabled. Sessions revoked toast. P2 unassigned from M365 licenses.
-
-7. **Enterprise applications → Microsoft Entra SAML Toolkit:** Users and groups shows MFA-Test-Group. Single sign-on shows Identifier, Reply Consume/22318, Sign on Login/22318.
-8. **My Apps InPrivate as testuser:** Toolkit tile → Login/22318 → signed in on the Toolkit home page.
-
-9. **App registrations → Entra OIDC Lab App:** client ID, redirect jwt.ms, ID tokens on, User.Read granted.
-10. **Enterprise app Properties / Users and groups:** Assignment required Yes; MFA-Test-Group assigned.
-11. **jwt.ms as testuser:** decoded ID token preferred_username, aud = client ID, ver 2.0.
-
-Stop there. AD and Okta are other repos.
-
-## Dated progress
-
-| When | What the dump shows |
-| --- | --- |
-| 2026-09-02 | P2 Managed Trial Active, expires Sep 30, 2026 |
-| 2026-09-02 | Test User created with Entra ID P2, not admin |
-| 2026-09-02 | Leaver User present in the tenant, P2 assigned, not in the group |
-| 2026-09-02 8:29 PM | MFA-Test-Group created (Security, role assignment off) |
-| 2026-09-02 | testuser added as the sole group member |
-| 2026-09-03 ~1:54–2:25 PM | Security defaults Disabled; policy created include MFA-Test-Group, All resources, Grant Require MFA. List lagged Report-only after enable toast |
-| 2026-09-03 2:25 PM | Policy modified; later list shows State On |
-| 2026-09-03 ~3:07–3:46 PM | What if Test User: policy applies, Grant Require MFA, State On |
-| 2026-09-03 ~3:46 PM | Leaver Disabled, sessions revoked, P2 unassigned. Test User still licensed |
-| 2026-09-03 ~4:17–5:03 PM | Microsoft Entra SAML Toolkit created; MFA-Test-Group assigned; SAML Consume/Login 22318 saved; Toolkit SP config 22318; InPrivate My Apps SSO as testuser |
-
-## Stop there
-
-Okta, AD lifecycle, CyberKy/LLDAP, and CyberArk are other sittings / other repos. This package covers Entra only.
+</details>
