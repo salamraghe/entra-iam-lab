@@ -15,10 +15,6 @@ This is the everyday Microsoft Entra ID work behind access tickets, done in a re
 
 ## What I learned
 
-*Interview line:*
-
-> "In Entra I required MFA for a test group with Conditional Access and gave that group SSO to a SAML app and an OIDC app. For a leaver, I disabled the account, revoked sessions, and removed the license and groups."
-
 ## Key screenshots
 
 ![](key/01-testuser-in-mfa-test-group.png)
